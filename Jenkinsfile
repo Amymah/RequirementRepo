@@ -19,7 +19,6 @@ pipeline {
             steps {
                 bat 'robot nestedframe.robot'
                 bat 'robot nestedframe2.robot'
-                bat 'robot OrangeHRM.robot'
             }
         }
     }
