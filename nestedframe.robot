@@ -6,7 +6,7 @@ Handle Nested Iframes
     Open Browser   https://the-internet.herokuapp.com/nested_frames    chrome
     Maximize Browser Window
     Set Selenium Speed    .3s
-    Sleep    6s
+    Sleep    3s
 
     Select Frame    xpath=//frame[@src="/frame_top"]
 
