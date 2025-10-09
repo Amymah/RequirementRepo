@@ -16,28 +16,21 @@ pipeline {
 
         stage('Run Robot Tests') {
             steps {
-                // Ensure Testcase folder exists
+                // Make sure the Testcase folder exists
                 bat 'if not exist Testcase mkdir Testcase'
 
-                // Run both test files inside Testcase folder
-                bat 'robot --output Testcase\\output1.xml Testcase\\nestedframe.robot'
-                bat 'robot --output Testcase\\output2.xml Testcase\\nestedframe2.robot'
-
-                // Merge the outputs into a single XML
-                bat 'rebot --merge --output Testcase\\output.xml Testcase\\output1.xml Testcase\\output2.xml'
-
-                // Generate final combined report
-                bat 'rebot --name "Combined Test Report" --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\output.xml'
+                // Run both test files together and generate single HTML report
+                bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe.robot Testcase\\nestedframe2.robot'
             }
         }
     }
 
     post {
         always {
-            // Archive the reports
-            archiveArtifacts artifacts: 'Testcase/log.html, Testcase/report.html, Testcase/output.xml', allowEmptyArchive: true
+            // Archive the HTML report (and log if needed)
+            archiveArtifacts artifacts: 'Testcase/report.html, Testcase/log.html', allowEmptyArchive: true
 
-            // Send email notification
+            // Send email notification with HTML report attached
             emailext(
                 subject: "Robot Test Results: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
                 body: """
@@ -47,7 +40,7 @@ pipeline {
                     <p>Status: <b style='color:${currentBuild.currentResult == "SUCCESS" ? "green" : "red"}'>
                         ${currentBuild.currentResult}
                     </b></p>
-                    <p>Combined test report has been generated for all Robot test cases.</p>
+                    <p>HTML test report has been generated for all Robot test cases.</p>
                     <p>View full report here:</p>
                     <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
                 """,
