@@ -21,7 +21,7 @@ pipeline {
                 bat 'robot --output output2.xml Testcase\\nestedframe2.robot'
 
                 // Combine the two result files into a single report in testcase folder
-                bat 'rebot --merge --output Test case\\output.xml Testcase\\output1.xml Testcase\\output2.xml'
+                bat 'rebot --merge --output Testcase\\output.xml Testcase\\output1.xml Testcase\\output2.xml'
 
                 // Generate a single final report in testcase folder
                 bat 'rebot --name "Combined Test Report" --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\output.xml'
