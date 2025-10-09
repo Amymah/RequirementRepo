@@ -16,14 +16,17 @@ pipeline {
 
         stage('Run Robot Tests') {
             steps {
-                // Run both test files and store outputs separately
-                bat 'robot --output output1.xml Testcase\\nestedframe.robot'
-                bat 'robot --output output2.xml Testcase\\nestedframe2.robot'
+                // Ensure Testcase folder exists
+                bat 'if not exist Testcase mkdir Testcase'
 
-                // Combine the two result files into a single report in testcase folder
+                // Run both test files inside Testcase folder
+                bat 'robot --output Testcase\\output1.xml Testcase\\nestedframe.robot'
+                bat 'robot --output Testcase\\output2.xml Testcase\\nestedframe2.robot'
+
+                // Merge the outputs into a single XML
                 bat 'rebot --merge --output Testcase\\output.xml Testcase\\output1.xml Testcase\\output2.xml'
 
-                // Generate a single final report in testcase folder
+                // Generate final combined report
                 bat 'rebot --name "Combined Test Report" --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\output.xml'
             }
         }
@@ -31,10 +34,10 @@ pipeline {
 
     post {
         always {
-            // Archive the combined reports from the testcase folder
+            // Archive the reports
             archiveArtifacts artifacts: 'Testcase/log.html, Testcase/report.html, Testcase/output.xml', allowEmptyArchive: true
 
-            // Send email notification with combined report
+            // Send email notification
             emailext(
                 subject: "Robot Test Results: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
                 body: """
