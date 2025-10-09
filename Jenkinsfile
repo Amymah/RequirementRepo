@@ -40,7 +40,7 @@ pipeline {
                     <p>You can view the build details and reports here:</p>
                     <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
                 """,
-                to: 'amymahu1@outlook.com', 'amyma.usman@bssuniversal.com'
+                to: 'amymahu1@outlook.com, amyma.usman@bssuniversal.com',
                 mimeType: 'text/html',
                 attachmentsPattern: '**/report.html, **/log.html'
             )
