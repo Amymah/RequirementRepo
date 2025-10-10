@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'NewNode' }  // 👈 Run pipeline on the connected agent
 
     stages {
         stage('Check Python') {
