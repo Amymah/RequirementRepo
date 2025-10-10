@@ -45,7 +45,6 @@ pipeline {
                     <p>Status: <b style='color:${currentBuild.currentResult == "SUCCESS" ? "green" : "red"}'>
                         ${currentBuild.currentResult}
                     </b></p>
-                    <p>A single HTML test report has been generated for all Robot test cases in the <b>Testcase</b> folder.</p>
                     <p>View full report here:</p>
                     <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
                 """,
