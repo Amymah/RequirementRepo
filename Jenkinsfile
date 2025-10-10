@@ -16,21 +16,26 @@ pipeline {
 
         stage('Run Robot Tests') {
             steps {
-                // Make sure the Testcase folder exists
+                // Ensure the Testcase folder exists
                 bat 'if not exist Testcase mkdir Testcase'
 
-                // Run both test files together and generate single HTML report
-                bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe.robot Testcase\\nestedframe2.robot'
+                // Run all test cases in Testcase folder and generate a single combined HTML report
+                bat '''
+                    robot --output Testcase\\output.xml ^
+                          --log Testcase\\log.html ^
+                          --report Testcase\\report.html ^
+                          Testcase
+                '''
             }
         }
     }
 
     post {
         always {
-            // Archive the HTML report (and log if needed)
+            // Archive the generated report and log
             archiveArtifacts artifacts: 'Testcase/report.html, Testcase/log.html', allowEmptyArchive: true
 
-            // Send email notification with HTML report attached
+            // Send email with the HTML report attached
             emailext(
                 subject: "Robot Test Results: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
                 body: """
@@ -40,7 +45,7 @@ pipeline {
                     <p>Status: <b style='color:${currentBuild.currentResult == "SUCCESS" ? "green" : "red"}'>
                         ${currentBuild.currentResult}
                     </b></p>
-                    <p>HTML test report has been generated for all Robot test cases.</p>
+                    <p>A single HTML test report has been generated for all Robot test cases in the <b>Testcase</b> folder.</p>
                     <p>View full report here:</p>
                     <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
                 """,
