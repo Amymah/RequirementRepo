@@ -2,18 +2,11 @@ pipeline {
     agent any
 
     stages {
-        // stage('Clone Repository') {
-        //     steps {
-        //         echo "Cloning repository..."
-        //         git branch: 'master', url: 'https://github.com/Amymah/RequirementRepo.git'
-        //     }
-        // }
-
         stage('Check Python') {
             steps {
                 bat 'python --version'
             }
-        // }
+        }
 
         stage('Install Dependencies') {
             steps {
@@ -26,9 +19,10 @@ pipeline {
                 echo "Running Robot Tests on Local Jenkins machine..."
                 // Ensure Testcase folder exists
                 bat 'if not exist Testcase mkdir Testcase'
+
                 // Run Robot tests
-                bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe.robot'
-                bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe2.robot'
+                bat 'robot --output Testcase\\output1.xml --log Testcase\\log1.html --report Testcase\\report1.html Testcase\\nestedframe.robot'
+                bat 'robot --output Testcase\\output2.xml --log Testcase\\log2.html --report Testcase\\report2.html Testcase\\nestedframe2.robot'
             }
         }
     }
@@ -51,7 +45,7 @@ pipeline {
                         """,
                         to: 'amymahu1@outlook.com, amyma.usman@bssuniversal.com',
                         mimeType: 'text/html',
-                        attachmentsPattern: 'Testcase/report.html, Testcase/log.html'
+                        attachmentsPattern: 'Testcase/report*.html, Testcase/log*.html'
                     )
 
                     echo "Email sent successfully. Now triggering remote job..."
@@ -66,12 +60,12 @@ pipeline {
         }
 
         failure {
-            echo " Local job failed. No email or remote trigger will occur."
+            echo "Local job failed. No email or remote trigger will occur."
         }
 
         always {
             echo "Build completed."
-            archiveArtifacts artifacts: 'Testcase/report.html, Testcase/log.html', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'Testcase/report*.html, Testcase/log*.html', allowEmptyArchive: true
         }
     }
 }
