@@ -2,18 +2,18 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                echo "Cloning repository..."
-                git branch: 'master', url: 'https://github.com/Amymah/RequirementRepo.git'
-            }
-        }
+        // stage('Clone Repository') {
+        //     steps {
+        //         echo "Cloning repository..."
+        //         git branch: 'master', url: 'https://github.com/Amymah/RequirementRepo.git'
+        //     }
+        // }
 
         stage('Check Python') {
             steps {
                 bat 'python --version'
             }
-        }
+        // }
 
         stage('Install Dependencies') {
             steps {
@@ -28,6 +28,7 @@ pipeline {
                 bat 'if not exist Testcase mkdir Testcase'
                 // Run Robot tests
                 bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe.robot'
+                bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe2.robot'
             }
         }
     }
