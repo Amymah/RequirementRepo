@@ -21,8 +21,7 @@ pipeline {
                 bat 'if not exist Testcase mkdir Testcase'
 
                 // Run Robot tests
-                bat 'robot --output Testcase\\output1.xml --log Testcase\\log1.html --report Testcase\\report1.html Testcase\\nestedframe.robot'
-                bat 'robot --output Testcase\\output2.xml --log Testcase\\log2.html --report Testcase\\report2.html Testcase\\nestedframe2.robot'
+                bat robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\*.robot
             }
         }
     }
