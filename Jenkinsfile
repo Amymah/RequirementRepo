@@ -1,7 +1,14 @@
- pipeline {
+pipeline {
     agent any
 
     stages {
+        stage('Clone Repository') {
+            steps {
+                echo "Cloning repository..."
+                git branch: 'master', url: 'https://github.com/Amymah/RequirementRepo.git'
+            }
+        }
+
         stage('Check Python') {
             steps {
                 bat 'python --version'
@@ -14,44 +21,56 @@
             }
         }
 
-        stage('Run Robot Tests') {
+        stage('Run Robot Tests (Local)') {
             steps {
-                // Ensure the Testcase folder exists
+                echo "Running Robot Tests on Local Jenkins machine..."
+                // Ensure Testcase folder exists
                 bat 'if not exist Testcase mkdir Testcase'
-
-                // Run all test cases in Testcase folder and generate a single combined HTML report
-                bat '''
-                    robot --output Testcase\\output.xml ^
-                          --log Testcase\\log.html ^
-                          --report Testcase\\report.html ^
-                          Testcase
-                '''
+                // Run Robot tests
+                bat 'robot --output Testcase\\output.xml --log Testcase\\log.html --report Testcase\\report.html Testcase\\nestedframe.robot'
             }
         }
     }
 
     post {
-        always {
-            // Archive the generated report and log
-            archiveArtifacts artifacts: 'Testcase/report.html, Testcase/log.html', allowEmptyArchive: true
+        success {
+            script {
+                echo "Local job succeeded. Sending success email..."
 
-            // Send email with the HTML report attached
-            emailext(
-                subject: "Robot Test Results: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
-                body: """
-                    <h3>Jenkins Build Notification</h3>
-                    <p>Job: <b>${env.JOB_NAME}</b></p>
-                    <p>Build Number: <b>${env.BUILD_NUMBER}</b></p>
-                    <p>Status: <b style='color:${currentBuild.currentResult == "SUCCESS" ? "green" : "red"}'>
-                        ${currentBuild.currentResult}
-                    </b></p>
-                    <p>View full report here:</p>
-                    <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
-                """,
-                to: 'amymahu1@outlook.com, amyma.usman@bssuniversal.com',
-                mimeType: 'text/html',
-                attachmentsPattern: 'Testcase/report.html, Testcase/log.html'
-            )
+                try {
+                    // Send success email
+                    emailext(
+                        subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: """
+                            <h3>Jenkins Build Success Notification</h3>
+                            <p><b>Job:</b> ${env.JOB_NAME}</p>
+                            <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
+                            <p>Status: <b style='color:green;'>SUCCESS</b></p>
+                            <p>Robot test reports generated successfully.</p>
+                        """,
+                        to: 'amymahu1@outlook.com, amyma.usman@bssuniversal.com',
+                        mimeType: 'text/html',
+                        attachmentsPattern: 'Testcase/report.html, Testcase/log.html'
+                    )
+
+                    echo "Email sent successfully. Now triggering remote job..."
+
+                    // Trigger the remote job only after successful email
+                    build job: 'Remote_Test_Job', wait: false
+
+                } catch (Exception e) {
+                    echo "Email sending failed, remote job will not be triggered."
+                }
+            }
+        }
+
+        failure {
+            echo " Local job failed. No email or remote trigger will occur."
+        }
+
+        always {
+            echo "Build completed."
+            archiveArtifacts artifacts: 'Testcase/report.html, Testcase/log.html', allowEmptyArchive: true
         }
     }
 }
